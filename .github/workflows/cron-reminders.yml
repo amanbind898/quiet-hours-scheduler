@@ -23,11 +23,19 @@ jobs:
           echo "⏰ Current time: $(date)"
           echo "🌍 UTC time: $(date -u)"
           
+          # Validate URL format
+          if [[ ! "${{ secrets.VERCEL_APP_URL }}" =~ ^https?:// ]]; then
+            echo "⚠️  Warning: VERCEL_APP_URL should start with https://"
+            echo "Current value appears to be: ${{ secrets.VERCEL_APP_URL }}"
+          fi
+          
           # Make the API call and capture both response and status code
+          # Follow redirects automatically with -L flag
           response=$(curl -X POST "${{ secrets.VERCEL_APP_URL }}/api/send-reminders" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -w "HTTPSTATUS:%{http_code}" \
+            -L \
             -s)
           
           # Extract HTTP status code and response body
@@ -49,8 +57,26 @@ jobs:
             else
               echo "📭 No reminders to send at this time"
             fi
+          elif [ $http_code -eq 308 ] || [ $http_code -eq 301 ] || [ $http_code -eq 302 ]; then
+            echo "❌ API call failed with redirect status $http_code"
+            echo "🔧 This usually means:"
+            echo "   1. VERCEL_APP_URL is missing 'https://' prefix"
+            echo "   2. URL has incorrect format"
+            echo "   3. Domain name is wrong"
+            echo ""
+            echo "✅ Fix: Update VERCEL_APP_URL in GitHub secrets to: https://your-app.vercel.app"
+            exit 1
+          elif [ $http_code -eq 401 ]; then
+            echo "❌ Authentication failed (401 Unauthorized)"
+            echo "🔧 Check your CRON_SECRET in GitHub secrets"
+            exit 1
+          elif [ $http_code -eq 404 ]; then
+            echo "❌ API endpoint not found (404)"
+            echo "🔧 Verify your API route exists at /api/send-reminders"
+            exit 1
           else
             echo "❌ API call failed with status $http_code"
+            echo "Response: $body"
             exit 1
           fi
         
