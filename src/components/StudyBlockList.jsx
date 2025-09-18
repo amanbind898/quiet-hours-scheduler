@@ -17,23 +17,18 @@ const StudyBlockList = ({ studyBlocks, onBlockDeleted, onBlockEdit }) => {
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
     
-    // Format: "Sep 18, 2025 at 19:40"
-    const dateOptions = {
+    // Format: "Sep 18, 2025 at 19:40" in local timezone
+    const options = {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
-    };
-    
-    const timeOptions = {
+      day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
-      hour12: false // 24-hour format
+      hour12: false, // 24-hour format
+      timeZoneName: 'short' // Shows timezone like IST, UTC, etc.
     };
     
-    const formattedDate = date.toLocaleDateString('en-US', dateOptions);
-    const formattedTime = date.toLocaleTimeString('en-US', timeOptions);
-    
-    return `${formattedDate} at ${formattedTime}`;
+    return date.toLocaleString('en-US', options);
   };
 
   const isUpcoming = (startTime) => {

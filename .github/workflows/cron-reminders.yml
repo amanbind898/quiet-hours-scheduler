@@ -20,12 +20,39 @@ jobs:
           fi
           
           echo "🚀 Calling reminder API at: ${{ secrets.VERCEL_APP_URL }}/api/send-reminders"
+          echo "⏰ Current time: $(date)"
+          echo "🌍 UTC time: $(date -u)"
           
-          curl -X POST "${{ secrets.VERCEL_APP_URL }}/api/send-reminders" \
+          # Make the API call and capture both response and status code
+          response=$(curl -X POST "${{ secrets.VERCEL_APP_URL }}/api/send-reminders" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            -w "HTTP Status: %{http_code}\n" \
-            --fail-with-body
+            -w "HTTPSTATUS:%{http_code}" \
+            -s)
+          
+          # Extract HTTP status code and response body
+          http_code=$(echo $response | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+          body=$(echo $response | sed -e 's/HTTPSTATUS:.*//g')
+          
+          echo "📊 HTTP Status: $http_code"
+          echo "📝 API Response:"
+          echo "$body" | jq '.' 2>/dev/null || echo "$body"
+          
+          # Check if successful
+          if [ $http_code -eq 200 ]; then
+            echo "✅ Reminder check completed successfully!"
+            
+            # Try to extract email count from response
+            email_count=$(echo "$body" | jq -r '.summary.sent // 0' 2>/dev/null || echo "0")
+            if [ "$email_count" -gt 0 ]; then
+              echo "📧 Sent $email_count email reminder(s)"
+            else
+              echo "📭 No reminders to send at this time"
+            fi
+          else
+            echo "❌ API call failed with status $http_code"
+            exit 1
+          fi
         
       - name: Log execution
         run: echo "Reminder check completed at $(date)"

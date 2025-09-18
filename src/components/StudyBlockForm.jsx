@@ -13,13 +13,23 @@ const StudyBlockForm = ({ onBlockCreated, existingBlocks, onCancel, editingBlock
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
 
+  // Helper function to convert UTC date to local datetime-local format
+  const formatDateTimeLocal = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    // Get local timezone offset and adjust
+    const offset = date.getTimezoneOffset() * 60000;
+    const localDate = new Date(date.getTime() - offset);
+    return localDate.toISOString().slice(0, 16);
+  };
+
   // Populate form when editing
   useEffect(() => {
     if (editingBlock) {
       setFormData({
         title: editingBlock.title || '',
-        start_time: editingBlock.start_time ? new Date(editingBlock.start_time).toISOString().slice(0, 16) : '',
-        end_time: editingBlock.end_time ? new Date(editingBlock.end_time).toISOString().slice(0, 16) : '',
+        start_time: formatDateTimeLocal(editingBlock.start_time),
+        end_time: formatDateTimeLocal(editingBlock.end_time),
         description: editingBlock.description || ''
       });
     } else {

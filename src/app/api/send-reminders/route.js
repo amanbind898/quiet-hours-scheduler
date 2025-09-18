@@ -8,17 +8,22 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request) {
+  const startTime = new Date();
+  console.log(`🚀 Reminder API called at ${startTime.toISOString()}`);
+  
   try {
     // Optional: Check for cron secret to prevent unauthorized access
     const cronSecret = process.env.CRON_SECRET;
     if (cronSecret) {
       const authHeader = request.headers.get('authorization');
       if (authHeader !== `Bearer ${cronSecret}`) {
+        console.log('❌ Unauthorized access attempt');
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
     }
 
     await connectDB();
+    console.log('✅ Connected to MongoDB');
 
     // Get current time and 10 minutes from now
     const now = new Date();
@@ -33,8 +38,16 @@ export async function POST(request) {
       reminder_sent: false
     });
 
+    console.log(`🔍 Found ${blocksToRemind.length} blocks needing reminders`);
+    
     if (!blocksToRemind || blocksToRemind.length === 0) {
-      return NextResponse.json({ message: 'No reminders to send' });
+      console.log('📭 No reminders to send at this time');
+      return NextResponse.json({ 
+        message: 'No reminders to send',
+        timestamp: new Date().toISOString(),
+        blocks: 0,
+        summary: { sent: 0, failed: 0, total: 0 }
+      });
     }
 
     // Get user emails from Supabase for each block
@@ -135,14 +148,25 @@ export async function POST(request) {
       }
     }
 
+    const sentCount = emailResults.filter(r => r.status === 'sent').length;
+    const failedCount = emailResults.filter(r => r.status === 'failed').length;
+    
     return NextResponse.json({ 
       message: `Processed ${blocksToRemind.length} reminders`,
+      timestamp: new Date().toISOString(),
       blocks: blocksToRemind.length,
       emailResults: emailResults,
       summary: {
-        sent: emailResults.filter(r => r.status === 'sent').length,
-        failed: emailResults.filter(r => r.status === 'failed').length
-      }
+        sent: sentCount,
+        failed: failedCount,
+        total: emailResults.length
+      },
+      details: emailResults.map(r => ({
+        email: r.email,
+        title: r.title,
+        status: r.status,
+        ...(r.error && { error: r.error })
+      }))
     });
 
   } catch (error) {
