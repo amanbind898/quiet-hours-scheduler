@@ -1,0 +1,37 @@
+name: Simple Reminder Cron
+
+on:
+  schedule:
+    # Runs every 5 minutes (GitHub Actions minimum for scheduled workflows)
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Call reminder API
+        run: |
+          # Replace YOUR_VERCEL_URL with your actual Vercel app URL
+          VERCEL_URL="https://your-app-name.vercel.app"
+          
+          echo "🚀 Calling: $VERCEL_URL/api/send-reminders"
+          
+          response=$(curl -X POST "$VERCEL_URL/api/send-reminders" \
+            -H "Content-Type: application/json" \
+            -w "HTTPSTATUS:%{http_code}" \
+            -s)
+          
+          http_code=$(echo $response | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+          body=$(echo $response | sed -e 's/HTTPSTATUS:.*//g')
+          
+          echo "📊 HTTP Status: $http_code"
+          echo "📝 Response: $body"
+          
+          if [ $http_code -eq 200 ]; then
+            echo "✅ Success!"
+          else
+            echo "❌ Failed with status $http_code"
+            exit 1
+          fi

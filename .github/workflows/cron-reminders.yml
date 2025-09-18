@@ -13,10 +13,19 @@ jobs:
     steps:
       - name: Send reminder emails
         run: |
-          curl -X POST ${{ secrets.VERCEL_APP_URL }}/api/send-reminders \
+          if [ -z "${{ secrets.VERCEL_APP_URL }}" ]; then
+            echo "❌ VERCEL_APP_URL secret is not set!"
+            echo "Please add your Vercel app URL to repository secrets"
+            exit 1
+          fi
+          
+          echo "🚀 Calling reminder API at: ${{ secrets.VERCEL_APP_URL }}/api/send-reminders"
+          
+          curl -X POST "${{ secrets.VERCEL_APP_URL }}/api/send-reminders" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            --fail --silent --show-error
+            -w "HTTP Status: %{http_code}\n" \
+            --fail-with-body
         
       - name: Log execution
         run: echo "Reminder check completed at $(date)"
