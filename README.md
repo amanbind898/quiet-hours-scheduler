@@ -2,8 +2,6 @@
 
 A modern web application for scheduling focused study sessions with automated email reminders.
 
-## ✅ **ASSIGNMENT COMPLETE**
-
 **Tech Stack**: ✅ Supabase Auth + ✅ MongoDB + ✅ Next.js + ✅ Email Triggers + ✅ CRON Jobs
 
 **Goal**: ✅ Authenticated users create silent-study time blocks with automated email reminders 10 minutes before start time, with no cron overlap prevention and MongoDB storage. Built with Next.js 15, React 19, and Supabase.
@@ -19,7 +17,6 @@ A modern web application for scheduling focused study sessions with automated em
 - **📅 Study Block Management**: Create, view, and delete study sessions
 - **⚠️ Overlap Prevention**: Automatic validation to prevent scheduling conflicts
 - **📧 Email Reminders**: Automated notifications 10 minutes before each session
-- **📱 Responsive Design**: Works seamlessly on desktop and mobile devices
 - **🔒 Data Security**: Row-level security ensures users only see their own data
 
 ## 🚀 Quick Start
