@@ -15,7 +15,25 @@ const StudyBlockList = ({ studyBlocks, onBlockDeleted, onBlockEdit }) => {
   };
 
   const formatDateTime = (dateString) => {
-    return new Date(dateString).toLocaleString();
+    const date = new Date(dateString);
+    
+    // Format: "Sep 18, 2025 at 19:40"
+    const dateOptions = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    };
+    
+    const timeOptions = {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false // 24-hour format
+    };
+    
+    const formattedDate = date.toLocaleDateString('en-US', dateOptions);
+    const formattedTime = date.toLocaleTimeString('en-US', timeOptions);
+    
+    return `${formattedDate} at ${formattedTime}`;
   };
 
   const isUpcoming = (startTime) => {
