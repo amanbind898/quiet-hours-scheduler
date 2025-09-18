@@ -13,25 +13,16 @@ jobs:
     steps:
       - name: Send reminder emails
         run: |
-          if [ -z "${{ secrets.VERCEL_APP_URL }}" ]; then
-            echo "❌ VERCEL_APP_URL secret is not set!"
-            echo "Please add your Vercel app URL to repository secrets"
-            exit 1
-          fi
+          # Direct Vercel URL - no secrets needed
+          VERCEL_URL="https://quiet-hours-scheduler-plum.vercel.app"
           
-          echo "🚀 Calling reminder API at: ${{ secrets.VERCEL_APP_URL }}/api/send-reminders"
+          echo "🚀 Calling reminder API at: ${VERCEL_URL}/api/send-reminders"
           echo "⏰ Current time: $(date)"
           echo "🌍 UTC time: $(date -u)"
           
-          # Validate URL format
-          if [[ ! "${{ secrets.VERCEL_APP_URL }}" =~ ^https?:// ]]; then
-            echo "⚠️  Warning: VERCEL_APP_URL should start with https://"
-            echo "Current value appears to be: ${{ secrets.VERCEL_APP_URL }}"
-          fi
-          
           # Make the API call and capture both response and status code
           # Follow redirects automatically with -L flag
-          response=$(curl -X POST "${{ secrets.VERCEL_APP_URL }}/api/send-reminders" \
+          response=$(curl -X POST "${VERCEL_URL}/api/send-reminders" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             -w "HTTPSTATUS:%{http_code}" \
