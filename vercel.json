@@ -1,8 +1,7 @@
 {
-  "crons": [
-    {
-      "path": "/api/send-reminders",
-      "schedule": "* * * * *"
+  "functions": {
+    "src/app/api/send-reminders/route.js": {
+      "maxDuration": 30
     }
-  ]
+  }
 }

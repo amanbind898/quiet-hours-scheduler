@@ -7,8 +7,17 @@ import { Resend } from 'resend';
 // Initialize Resend with API key
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export async function POST() {
+export async function POST(request) {
   try {
+    // Optional: Check for cron secret to prevent unauthorized access
+    const cronSecret = process.env.CRON_SECRET;
+    if (cronSecret) {
+      const authHeader = request.headers.get('authorization');
+      if (authHeader !== `Bearer ${cronSecret}`) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+    }
+
     await connectDB();
 
     // Get current time and 10 minutes from now

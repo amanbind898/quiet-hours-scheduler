@@ -61,12 +61,14 @@ npm run dev
 
 ## 🔧 Configuration Details
 
-### Vercel Cron Jobs
-The `vercel.json` file configures automatic email reminders:
-- Runs every minute: `"schedule": "* * * * *"`
-- Calls `/api/send-reminders` endpoint
-- Finds study blocks starting in 10 minutes
-- Sends email notifications
+### ⚠️ Cron Jobs (Vercel Hobby Limitation)
+**Important**: Vercel cron jobs require a Pro plan ($20/month). For free alternatives:
+
+1. **GitHub Actions** (Recommended - FREE)
+2. **Cron-job.org** (External service - FREE)  
+3. **UptimeRobot** (5-minute intervals - FREE)
+
+See `CRON-ALTERNATIVES.md` for detailed setup instructions.
 
 ### Email Templates
 Beautiful HTML emails include:

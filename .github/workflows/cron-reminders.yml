@@ -1,0 +1,22 @@
+name: Send Study Block Reminders
+
+on:
+  schedule:
+    # Runs every minute
+    - cron: '* * * * *'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Send reminder emails
+        run: |
+          curl -X POST ${{ secrets.VERCEL_APP_URL }}/api/send-reminders \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            --fail --silent --show-error
+        
+      - name: Log execution
+        run: echo "Reminder check completed at $(date)"
