@@ -54,9 +54,6 @@ export async function POST(request) {
     const body = await request.json();
     const { title, description, start_time, end_time } = body;
 
-    // Debug logging
-    console.log('Received data:', { title, start_time, end_time });
-
     // Validate required fields
     if (!title || !start_time || !end_time) {
       return NextResponse.json(
@@ -67,19 +64,9 @@ export async function POST(request) {
 
     // Handle datetime-local input properly
     // datetime-local gives us a string like "2025-09-19T17:59"
-    // We need to treat this as local time, not UTC
+    // We need to ensure it's treated as local time by the user's timezone
     const startTime = new Date(start_time);
     const endTime = new Date(end_time);
-    
-    // Debug logging
-    console.log('Parsed dates:', { 
-      originalStartTime: start_time,
-      originalEndTime: end_time,
-      startTime: startTime.toISOString(), 
-      endTime: endTime.toISOString(),
-      startTimeLocal: startTime.toString(),
-      endTimeLocal: endTime.toString()
-    });
 
     if (startTime >= endTime) {
       return NextResponse.json(

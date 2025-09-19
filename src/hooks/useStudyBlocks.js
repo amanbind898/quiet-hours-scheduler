@@ -55,9 +55,6 @@ export const useStudyBlocks = () => {
   // Create a new study block
   const createStudyBlock = async (blockData) => {
     try {
-      // Debug logging
-      console.log('Frontend sending data:', blockData);
-      
       const headers = await getAuthHeaders();
       
       const response = await fetch('/api/study-blocks', {
