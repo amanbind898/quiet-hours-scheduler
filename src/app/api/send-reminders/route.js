@@ -12,7 +12,7 @@ export async function POST(request) {
   console.log(`🚀 Reminder API called at ${startTime.toISOString()}`);
   
   try {
-    // Optional: Check for cron secret to prevent unauthorized access
+  
     const cronSecret = process.env.CRON_SECRET;
     if (cronSecret) {
       const authHeader = request.headers.get('authorization');
@@ -24,12 +24,8 @@ export async function POST(request) {
 
     await connectDB();
     console.log('✅ Connected to MongoDB');
-
-    // Get current time and 10 minutes from now
     const now = new Date();
     const tenMinutesFromNow = new Date(now.getTime() + 10 * 60 * 1000);
-
-    // Find study blocks that start in the next 10 minutes and haven't had reminders sent
     const blocksToRemind = await StudyBlock.find({
       start_time: {
         $gte: now,
@@ -50,12 +46,11 @@ export async function POST(request) {
       });
     }
 
-    // Get user emails from Supabase for each block
+    
     const blocksWithUserData = [];
     
     for (const block of blocksToRemind) {
       try {
-        // Get user data from Supabase Auth
         const { data: { user }, error } = await supabase.auth.admin.getUserById(block.user_id);
         
         if (!error && user) {
@@ -82,7 +77,7 @@ export async function POST(request) {
     for (const block of blocksWithUserData) {
       try {
         const emailResult = await resend.emails.send({
-          from: process.env.FROM_EMAIL || 'Quiet Hours <noreply@yourdomain.com>',
+          from: 'Resend <onboarding@resend.dev>',
           to: [block.userEmail],
           subject: `🤫 Reminder: ${block.title} starts in 10 minutes`,
           html: `
@@ -178,16 +173,3 @@ export async function POST(request) {
   }
 }
 
-// This endpoint can be called by a cron job or scheduled task
-// Example: Set up a cron job to call this every minute:
-// * * * * * curl -X POST https://your-domain.com/api/send-reminders
-
-// Or use Vercel Cron Jobs (vercel.json):
-/*
-{
-  "crons": [{
-    "path": "/api/send-reminders",
-    "schedule": "* * * * *"
-  }]
-}
-*/
