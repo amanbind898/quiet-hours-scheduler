@@ -17,23 +17,25 @@ const StudyBlockList = ({ studyBlocks, onBlockDeleted, onBlockEdit }) => {
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
     
-    // Format: "Sep 20, 2025 at 4:10 AM" in local timezone
-    const dateOptions = {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    };
+    // Static month names to avoid locale issues
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
-    const timeOptions = {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true, // 12-hour format with AM/PM
-    };
+    // Extract date components
+    const year = date.getFullYear();
+    const month = months[date.getMonth()];
+    const day = date.getDate();
     
-    const formattedDate = date.toLocaleDateString('en-US', dateOptions);
-    const formattedTime = date.toLocaleTimeString('en-US', timeOptions);
+    // Extract time components
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
     
-    return `${formattedDate} at ${formattedTime}`;
+    // Convert to 12-hour format
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0 should be 12
+    
+    return `${month} ${day}, ${year} at ${hours}:${minutes} ${ampm}`;
   };
 
   const isUpcoming = (startTime) => {
