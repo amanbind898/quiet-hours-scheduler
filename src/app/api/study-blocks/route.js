@@ -62,7 +62,7 @@ export async function POST(request) {
       );
     }
 
-    // Validate times
+    // Validate times - datetime-local gives us local time, so we parse it correctly
     const startTime = new Date(start_time);
     const endTime = new Date(end_time);
 
